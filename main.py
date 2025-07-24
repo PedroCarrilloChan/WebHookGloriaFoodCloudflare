@@ -130,16 +130,17 @@ def webhook_gloriafood():
                 enviar_notificacion_smartpass(customer_id, None, "points/add", points=1)
 
         elif estado_actual == 'canceled':
-            mensaje = "❌ Tu pedido ha sido cancelado. Si tienes dudas, contáctanos. ¡Esperamos ayudarte pronto!"
-            # 1. Envía el mensaje de cancelación
-            enviar_notificacion_smartpass(customer_id, mensaje, "message")
+            # 1. Resta 1 punto primero
+            print("\n  - Restando 1 punto por cancelación...")
+            enviar_notificacion_smartpass(customer_id, None, "points/add", points=-1)
 
             # 2. Espera 4 segundos
-            print("\n  - Esperando 4 segundos antes de restar puntos...")
+            print("\n  - Esperando 4 segundos antes de enviar notificación...")
             time.sleep(4)
 
-            # 3. Resta 1 punto
-            enviar_notificacion_smartpass(customer_id, None, "points/add", points=-1)
+            # 3. Envía el mensaje de cancelación
+            mensaje = "❌ Tu pedido ha sido cancelado. Si tienes dudas, contáctanos. ¡Esperamos ayudarte pronto!"
+            enviar_notificacion_smartpass(customer_id, mensaje, "message")
 
         else:
             print(f"  - Estado '{estado_actual}' no reconocido. No se realiza ninguna acción.")
