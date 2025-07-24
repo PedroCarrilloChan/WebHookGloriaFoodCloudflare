@@ -23,7 +23,6 @@ def buscar_cliente_smartpass(email_pedido):
     headers = {'Content-Type': 'application/json', 'Authorization': token}
     program_id = "4886905521176576"
 
-    # Paso 1: Obtener la lista completa de clientes
     list_url = f"https://pass.center/api/v1/loyalty/programs/{program_id}/customers"
 
     try:
@@ -34,15 +33,12 @@ def buscar_cliente_smartpass(email_pedido):
         todos_los_clientes = response.json()
         print(f"  - Encontrados {len(todos_los_clientes)} clientes en total. Buscando coincidencia por email...")
 
-        # Paso 2: Recorrer la lista para encontrar una coincidencia
         for cliente in todos_los_clientes:
             if cliente.get('email') == email_pedido:
                 customer_id = cliente.get('id')
                 print(f"✅ Cliente encontrado en Smart Passes. ID: {customer_id}")
                 return {"id": customer_id}, None
 
-        # --- LÓGICA MODIFICADA ---
-        # Si el bucle termina, el cliente no existe. Devolvemos un error.
         print("❌ Cliente no encontrado en la lista de Smart Passes.")
         return None, "El cliente no tiene una tarjeta digital instalada (no encontrado en Smart Passes)."
 
@@ -55,8 +51,10 @@ def buscar_cliente_smartpass(email_pedido):
         print(f"❌ {error_msg}")
         return None, error_msg
 
-def enviar_notificacion_smartpass(customer_id, message, endpoint):
-    """Función unificada para enviar mensajes o agregar puntos en Smart Passes."""
+def enviar_notificacion_smartpass(customer_id, message, endpoint, points=1):
+    """
+    Función unificada para enviar mensajes o agregar/quitar puntos en Smart Passes.
+    """
     base_url = f"https://pass.center/api/v1/loyalty/programs/4886905521176576/customers/{customer_id}"
     url = f"{base_url}/{endpoint}"
 
@@ -65,8 +63,8 @@ def enviar_notificacion_smartpass(customer_id, message, endpoint):
         print(f"\n--- 📨 Iniciando envío de mensaje vía Smart Passes ---")
         body = {"message": message}
     elif endpoint == "points/add":
-        print(f"\n--- ✨ Iniciando adición de puntos vía Smart Passes ---")
-        body = {"points": 1}
+        print(f"\n--- ✨ Iniciando modificación de puntos ({points}) vía Smart Passes ---")
+        body = {"points": points}
 
     token = os.environ.get('SMARTPASSES_TOKEN')
     headers = {'Content-Type': 'application/json', 'Authorization': token}
@@ -83,7 +81,7 @@ def enviar_notificacion_smartpass(customer_id, message, endpoint):
 # --- Controlador Principal del Webhook (ACTUALIZADO) ---
 @app.route('/webhook/pedidos', methods=['POST'])
 def webhook_gloriafood():
-    """Punto de entrada principal que ahora solo busca clientes existentes."""
+    """Punto de entrada principal que ahora resta puntos en cancelación."""
     print("\n\n" + "="*50)
     print("--- 📥 INICIO DE NUEVO PROCESO DE WEBHOOK ---")
     print(f"--- {time.strftime('%Y-%m-%d %H:%M:%S')} ---")
@@ -99,10 +97,7 @@ def webhook_gloriafood():
 
         pedido_gloriafood = data['orders'][0]
 
-        info_pedido = {
-            "id": pedido_gloriafood.get('id'),
-            "estado": pedido_gloriafood.get('status')
-        }
+        info_pedido = {"id": pedido_gloriafood.get('id'), "estado": pedido_gloriafood.get('status')}
         info_cliente = {"email": pedido_gloriafood.get('client_email')}
 
         print("\n2. DATOS EXTRAÍDOS DEL PEDIDO:")
@@ -112,16 +107,13 @@ def webhook_gloriafood():
         if not info_cliente['email']:
             return jsonify({"error": "El pedido no contiene un email de cliente"}), 400
 
-        # --- LÓGICA PRINCIPAL ACTUALIZADA ---
-        # 3. Buscar cliente directamente en Smart Passes
         cliente_smartpass, error = buscar_cliente_smartpass(info_cliente['email'])
         if error:
             print(f"🔴 Proceso detenido. Razón: {error}")
-            return jsonify({"status": "ignored", "reason": error}), 200 # Usamos 200 para que GloriaFood no reintente
+            return jsonify({"status": "ignored", "reason": error}), 200
 
         customer_id = cliente_smartpass['id']
 
-        # 4. Router Lógico: Ejecutar acciones según el estado del pedido
         estado_actual = info_pedido['estado']
         print(f"\n4. LÓGICA DE ESTADO (ROUTING):")
         print(f"  - El estado detectado es '{estado_actual}'. Ejecutando acciones...")
@@ -135,11 +127,19 @@ def webhook_gloriafood():
             if enviar_notificacion_smartpass(customer_id, mensaje, "message"):
                 print("\n  - Esperando 4 segundos antes de añadir puntos...")
                 time.sleep(4)
-                enviar_notificacion_smartpass(customer_id, None, "points/add")
+                enviar_notificacion_smartpass(customer_id, None, "points/add", points=1)
 
         elif estado_actual == 'canceled':
             mensaje = "❌ Tu pedido ha sido cancelado. Si tienes dudas, contáctanos. ¡Esperamos ayudarte pronto!"
+            # 1. Envía el mensaje de cancelación
             enviar_notificacion_smartpass(customer_id, mensaje, "message")
+
+            # 2. Espera 4 segundos
+            print("\n  - Esperando 4 segundos antes de restar puntos...")
+            time.sleep(4)
+
+            # 3. Resta 1 punto
+            enviar_notificacion_smartpass(customer_id, None, "points/add", points=-1)
 
         else:
             print(f"  - Estado '{estado_actual}' no reconocido. No se realiza ninguna acción.")
