@@ -136,7 +136,7 @@ def webhook_gloriafood():
                 mensaje = "⏳ Tu pedido para comer en el restaurante está siendo procesado. Te confirmaremos en breve. ¡Gracias por tu paciencia!"
                 enviar_notificacion_smartpass(customer_id, mensaje, "message")
 
-            elif estado_actual == 'accepted' and not pedido_ready:
+            elif estado_actual == 'accepted' and pedido_ready == False:
                 mensaje = f"🍽️ ¡Tu pedido ha sido confirmado! Estamos preparando tu comida y pronto estará lista para llevártela a tu mesa. Folio: {info_pedido['id']}"
                 if enviar_notificacion_smartpass(customer_id, mensaje, "message"):
                     print("\n  - Esperando 4 segundos antes de añadir puntos...")
@@ -149,7 +149,7 @@ def webhook_gloriafood():
                         time.sleep(2)
                         enviar_notificacion_smartpass(customer_id, None, "points/add", points=1)
 
-            elif estado_actual == 'accepted' and pedido_ready:
+            elif estado_actual == 'accepted' and pedido_ready == True:
                 mensaje = f"🔔 ¡Tu comida está lista! Nuestro mesero te la llevará a tu mesa en un momento. Folio: {info_pedido['id']}"
                 enviar_notificacion_smartpass(customer_id, mensaje, "message")
 
@@ -167,7 +167,7 @@ def webhook_gloriafood():
                 mensaje = "⏳ Tu pedido está siendo procesado. Te notificaremos cuando sea confirmado. ¡Gracias por tu paciencia!"
                 enviar_notificacion_smartpass(customer_id, mensaje, "message")
 
-            elif estado_actual == 'accepted' and not pedido_ready:
+            elif estado_actual == 'accepted' and pedido_ready == False:
                 mensaje = f"✅ ¡Genial! Tu pedido ha sido confirmado y está en preparación. Folio del Pedido: {info_pedido['id']}"
                 if enviar_notificacion_smartpass(customer_id, mensaje, "message"):
                     print("\n  - Esperando 4 segundos antes de añadir puntos...")
@@ -180,7 +180,7 @@ def webhook_gloriafood():
                         time.sleep(2)
                         enviar_notificacion_smartpass(customer_id, None, "points/add", points=1)
 
-            elif estado_actual == 'accepted' and pedido_ready:
+            elif estado_actual == 'accepted' and pedido_ready == True:
                 if tipo_pedido == 'pickup':
                     mensaje = f"🔔 ¡Tu pedido está listo para recoger! Puedes pasar por él cuando gustes. Folio: {info_pedido['id']}"
                 elif tipo_pedido == 'delivery':
