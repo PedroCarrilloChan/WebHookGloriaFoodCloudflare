@@ -167,7 +167,7 @@ def webhook_gloriafood():
                 mensaje = "⏳ Tu pedido está siendo procesado. Te notificaremos cuando sea confirmado. ¡Gracias por tu paciencia!"
                 enviar_notificacion_smartpass(customer_id, mensaje, "message")
 
-            elif estado_actual == 'accepted':
+            elif estado_actual == 'accepted' and not pedido_ready:
                 mensaje = f"✅ ¡Genial! Tu pedido ha sido confirmado y está en preparación. Folio del Pedido: {info_pedido['id']}"
                 if enviar_notificacion_smartpass(customer_id, mensaje, "message"):
                     print("\n  - Esperando 4 segundos antes de añadir puntos...")
@@ -179,6 +179,15 @@ def webhook_gloriafood():
                         print(f"\n  - Total ${total_precio} >= $100. Agregando estampilla digital...")
                         time.sleep(2)
                         enviar_notificacion_smartpass(customer_id, None, "points/add", points=1)
+
+            elif estado_actual == 'accepted' and pedido_ready:
+                if tipo_pedido == 'pickup':
+                    mensaje = f"🔔 ¡Tu pedido está listo para recoger! Puedes pasar por él cuando gustes. Folio: {info_pedido['id']}"
+                elif tipo_pedido == 'delivery':
+                    mensaje = f"🚗 ¡Tu pedido está listo! Nuestro repartidor saldrá en breve a entregártelo. Folio: {info_pedido['id']}"
+                else:
+                    mensaje = f"🔔 ¡Tu pedido está listo! Folio: {info_pedido['id']}"
+                enviar_notificacion_smartpass(customer_id, mensaje, "message")
 
             elif estado_actual == 'canceled':
                 print("\n  - Restando 1 punto por cancelación...")
