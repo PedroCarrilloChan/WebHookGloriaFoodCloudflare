@@ -97,11 +97,19 @@ def webhook_gloriafood():
 
         pedido_gloriafood = data['orders'][0]
 
-        info_pedido = {"id": pedido_gloriafood.get('id'), "estado": pedido_gloriafood.get('status')}
+        info_pedido = {
+            "id": pedido_gloriafood.get('id'), 
+            "estado": pedido_gloriafood.get('status'),
+            "tipo": pedido_gloriafood.get('type'),
+            "ready": pedido_gloriafood.get('ready'),
+            "total_price": pedido_gloriafood.get('total_price', 0)
+        }
         info_cliente = {"email": pedido_gloriafood.get('client_email')}
 
         print("\n2. DATOS EXTRAÍDOS DEL PEDIDO:")
         print(f"  - Pedido ID: {info_pedido['id']}, Estado: '{info_pedido['estado']}'")
+        print(f"  - Tipo: '{info_pedido['tipo']}', Ready: {info_pedido['ready']}")
+        print(f"  - Total: ${info_pedido['total_price']}")
         print(f"  - Cliente: {info_cliente['email']}")
 
         if not info_cliente['email']:
@@ -115,34 +123,72 @@ def webhook_gloriafood():
         customer_id = cliente_smartpass['id']
 
         estado_actual = info_pedido['estado']
+        tipo_pedido = info_pedido['tipo']
+        pedido_ready = info_pedido['ready']
+        total_precio = info_pedido['total_price']
+
         print(f"\n4. LÓGICA DE ESTADO (ROUTING):")
-        print(f"  - El estado detectado es '{estado_actual}'. Ejecutando acciones...")
+        print(f"  - Estado: '{estado_actual}', Tipo: '{tipo_pedido}', Ready: {pedido_ready}")
 
-        if estado_actual == 'pending':
-            mensaje = "⏳ Tu pedido está siendo procesado. Te notificaremos cuando sea confirmado. ¡Gracias por tu paciencia!"
-            enviar_notificacion_smartpass(customer_id, mensaje, "message")
+        # LÓGICA ESPECÍFICA PARA PEDIDOS DINE-IN (COMER EN RESTAURANTE)
+        if tipo_pedido == 'dine_in':
+            if estado_actual == 'pending':
+                mensaje = "⏳ Tu pedido para comer en el restaurante está siendo procesado. Te confirmaremos en breve. ¡Gracias por tu paciencia!"
+                enviar_notificacion_smartpass(customer_id, mensaje, "message")
 
-        elif estado_actual == 'accepted':
-            mensaje = f"✅ ¡Genial! Tu pedido ha sido confirmado y está en preparación. Folio del Pedido: {info_pedido['id']}"
-            if enviar_notificacion_smartpass(customer_id, mensaje, "message"):
-                print("\n  - Esperando 4 segundos antes de añadir puntos...")
+            elif estado_actual == 'accepted' and not pedido_ready:
+                mensaje = f"🍽️ ¡Tu pedido ha sido confirmado! Estamos preparando tu comida y pronto estará lista para llevártela a tu mesa. Folio: {info_pedido['id']}"
+                if enviar_notificacion_smartpass(customer_id, mensaje, "message"):
+                    print("\n  - Esperando 4 segundos antes de añadir puntos...")
+                    time.sleep(4)
+                    enviar_notificacion_smartpass(customer_id, None, "points/add", points=1)
+                    
+                    # Agregar estampilla digital si supera $100
+                    if total_precio >= 100:
+                        print(f"\n  - Total ${total_precio} >= $100. Agregando estampilla digital...")
+                        time.sleep(2)
+                        enviar_notificacion_smartpass(customer_id, None, "points/add", points=1)
+
+            elif estado_actual == 'accepted' and pedido_ready:
+                mensaje = f"🔔 ¡Tu comida está lista! Nuestro mesero te la llevará a tu mesa en un momento. Folio: {info_pedido['id']}"
+                enviar_notificacion_smartpass(customer_id, mensaje, "message")
+
+            elif estado_actual == 'canceled':
+                print("\n  - Restando 1 punto por cancelación...")
+                enviar_notificacion_smartpass(customer_id, None, "points/add", points=-1)
+                print("\n  - Esperando 4 segundos antes de enviar notificación...")
                 time.sleep(4)
-                enviar_notificacion_smartpass(customer_id, None, "points/add", points=1)
+                mensaje = "❌ Tu pedido para comer en el restaurante ha sido cancelado. Si tienes dudas, contáctanos. ¡Te esperamos pronto!"
+                enviar_notificacion_smartpass(customer_id, mensaje, "message")
 
-        elif estado_actual == 'canceled':
-            # 1. Resta 1 punto primero
-            print("\n  - Restando 1 punto por cancelación...")
-            enviar_notificacion_smartpass(customer_id, None, "points/add", points=-1)
-
-            # 2. Espera 4 segundos
-            print("\n  - Esperando 4 segundos antes de enviar notificación...")
-            time.sleep(4)
-
-            # 3. Envía el mensaje de cancelación
-            mensaje = "❌ Tu pedido ha sido cancelado. Si tienes dudas, contáctanos. ¡Esperamos ayudarte pronto!"
-            enviar_notificacion_smartpass(customer_id, mensaje, "message")
-
+        # LÓGICA PARA OTROS TIPOS DE PEDIDOS (delivery, pickup, etc.)
         else:
+            if estado_actual == 'pending':
+                mensaje = "⏳ Tu pedido está siendo procesado. Te notificaremos cuando sea confirmado. ¡Gracias por tu paciencia!"
+                enviar_notificacion_smartpass(customer_id, mensaje, "message")
+
+            elif estado_actual == 'accepted':
+                mensaje = f"✅ ¡Genial! Tu pedido ha sido confirmado y está en preparación. Folio del Pedido: {info_pedido['id']}"
+                if enviar_notificacion_smartpass(customer_id, mensaje, "message"):
+                    print("\n  - Esperando 4 segundos antes de añadir puntos...")
+                    time.sleep(4)
+                    enviar_notificacion_smartpass(customer_id, None, "points/add", points=1)
+                    
+                    # Agregar estampilla digital si supera $100
+                    if total_precio >= 100:
+                        print(f"\n  - Total ${total_precio} >= $100. Agregando estampilla digital...")
+                        time.sleep(2)
+                        enviar_notificacion_smartpass(customer_id, None, "points/add", points=1)
+
+            elif estado_actual == 'canceled':
+                print("\n  - Restando 1 punto por cancelación...")
+                enviar_notificacion_smartpass(customer_id, None, "points/add", points=-1)
+                print("\n  - Esperando 4 segundos antes de enviar notificación...")
+                time.sleep(4)
+                mensaje = "❌ Tu pedido ha sido cancelado. Si tienes dudas, contáctanos. ¡Esperamos ayudarte pronto!"
+                enviar_notificacion_smartpass(customer_id, mensaje, "message")
+
+        if estado_actual not in ['pending', 'accepted', 'canceled']:
             print(f"  - Estado '{estado_actual}' no reconocido. No se realiza ninguna acción.")
 
         print("\n" + "="*50)
