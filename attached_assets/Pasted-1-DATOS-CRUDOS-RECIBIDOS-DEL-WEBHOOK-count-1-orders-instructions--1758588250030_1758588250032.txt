@@ -1,0 +1,259 @@
+1. DATOS CRUDOS RECIBIDOS DEL WEBHOOK:
+{
+  "count": 1,
+  "orders": [
+    {
+      "instructions": "",
+      "coupons": [],
+      "tax_list": [],
+      "missed_reason": null,
+      "billing_details": null,
+      "fulfillment_option": null,
+      "table_number": null,
+      "ready": false,
+      "dine_in_subtype": "pickup_consume",
+      "dine_in_subtype_custom_name": null,
+      "dine_in_subtype_custom_text": "Comer en Restaurante",
+      "charge_to_room_surname": null,
+      "charge_to_room_number": null,
+      "delivery_by_distance": null,
+      "updated_at": "2025-09-23T00:40:34.000Z",
+      "id": 1090454004,
+      "total_price": 156,
+      "sub_total_price": 156,
+      "tax_value": 0,
+      "persons": 0,
+      "latitude": null,
+      "longitude": null,
+      "client_first_name": "Pedro",
+      "client_last_name": "Carrillo",
+      "client_email": "pcarrillo@gmail.com",
+      "client_phone": "+529994358800",
+      "restaurant_name": "Asa2 Los Primos",
+      "currency": "MXN",
+      "type": "dine_in",
+      "status": "accepted",
+      "source": "mobile_web",
+      "pin_skipped": false,
+      "accepted_at": "2025-09-23T00:40:34.000Z",
+      "tax_type": "GROSS",
+      "tax_name": "Sales Tax",
+      "fulfill_at": "2025-09-23T01:10:34.000Z",
+      "client_language": "es",
+      "integration_payment_provider": null,
+      "integration_payment_amount": 0,
+      "client_ip_address": "190.123.12.50",
+      "reference": null,
+      "restaurant_id": 616473,
+      "client_id": 80110465,
+      "restaurant_phone": "+52 999 438 0869",
+      "restaurant_timezone": "UTC",
+      "delivery_zone_name": null,
+      "outside_delivery_area": null,
+      "card_type": null,
+      "used_payment_methods": [
+        "CASH"
+      ],
+      "company_account_id": 1765042,
+      "pos_system_id": 71032,
+      "restaurant_key": "aJRO5uZmwHG7wZxa16",
+      "restaurant_country": "Mexico",
+      "restaurant_city": "Merida",
+      "restaurant_zipcode": "97204",
+      "restaurant_street": "5b",
+      "restaurant_latitude": "21.03295766278363",
+      "restaurant_longitude": "-89.63417234074603",
+      "client_marketing_consent": true,
+      "restaurant_token": "gvs2XeXA1gkbbbq2e6MMXmzt5hFk30PZM",
+      "gateway_transaction_id": null,
+      "gateway_type": null,
+      "client_order_count": 1,
+      "api_version": 2,
+      "payment": "CASH",
+      "for_later": false,
+      "client_address": null,
+      "client_address_parts": null,
+      "items": [
+        {
+          "kitchen_internal_name": null,
+          "id": 1440558074,
+          "name": "Spaghetti Carbonara",
+          "total_item_price": 156,
+          "price": 12,
+          "quantity": 13,
+          "instructions": "",
+          "type": "item",
+          "type_id": 21223818,
+          "tax_rate": 0,
+          "tax_value": 0,
+          "parent_id": null,
+          "item_discount": 0,
+          "cart_discount_rate": 0,
+          "cart_discount": 0,
+          "tax_type": "GROSS",
+          "options": []
+        }
+      ]
+    }
+  ]
+}
+
+2. DATOS EXTRAÍDOS DEL PEDIDO:
+  - Pedido ID: 1090454004, Estado: 'accepted'
+  - Cliente: pcarrillo@gmail.com
+
+--- 🔎 Iniciando búsqueda de cliente en Smart Passes ---
+  - Obteniendo lista de todos los clientes de: https://pass.center/api/v1/loyalty/programs/4886905521176576/customers
+  - Encontrados 131 clientes en total. Buscando coincidencia por email...
+✅ Cliente encontrado en Smart Passes. ID: 4813056943325184
+
+4. LÓGICA DE ESTADO (ROUTING):
+  - El estado detectado es 'accepted'. Ejecutando acciones...
+
+--- 📨 Iniciando envío de mensaje vía Smart Passes ---
+✅ Petición a Smart Passes enviada exitosamente.
+
+  - Esperando 4 segundos antes de añadir puntos...
+
+--- ✨ Iniciando modificación de puntos (1) vía Smart Passes ---
+✅ Petición a Smart Passes enviada exitosamente.
+
+==================================================
+--- ✅ FIN DEL PROCESO DE WEBHOOK ---
+==================================================
+
+
+172.31.105.226 - - [23/Sep/2025 00:40:40] "POST /webhook/pedidos HTTP/1.1" 200 -
+
+
+==================================================
+--- 📥 INICIO DE NUEVO PROCESO DE WEBHOOK ---
+--- 2025-09-23 00:42:32 ---
+==================================================
+
+1. DATOS CRUDOS RECIBIDOS DEL WEBHOOK:
+{
+  "count": 1,
+  "orders": [
+    {
+      "instructions": "",
+      "coupons": [],
+      "tax_list": [],
+      "missed_reason": null,
+      "billing_details": null,
+      "fulfillment_option": null,
+      "table_number": null,
+      "ready": true,
+      "dine_in_subtype": "pickup_consume",
+      "dine_in_subtype_custom_name": null,
+      "dine_in_subtype_custom_text": "Comer en Restaurante",
+      "charge_to_room_surname": null,
+      "charge_to_room_number": null,
+      "delivery_by_distance": null,
+      "updated_at": "2025-09-23T00:42:32.000Z",
+      "id": 1090454004,
+      "total_price": 156,
+      "sub_total_price": 156,
+      "tax_value": 0,
+      "persons": 0,
+      "latitude": null,
+      "longitude": null,
+      "client_first_name": "Pedro",
+      "client_last_name": "Carrillo",
+      "client_email": "pcarrillo@gmail.com",
+      "client_phone": "+529994358800",
+      "restaurant_name": "Asa2 Los Primos",
+      "currency": "MXN",
+      "type": "dine_in",
+      "status": "accepted",
+      "source": "mobile_web",
+      "pin_skipped": false,
+      "accepted_at": "2025-09-23T00:40:34.000Z",
+      "tax_type": "GROSS",
+      "tax_name": "Sales Tax",
+      "fulfill_at": "2025-09-23T01:10:34.000Z",
+      "client_language": "es",
+      "integration_payment_provider": null,
+      "integration_payment_amount": 0,
+      "client_ip_address": "190.123.12.50",
+      "reference": null,
+      "restaurant_id": 616473,
+      "client_id": 80110465,
+      "restaurant_phone": "+52 999 438 0869",
+      "restaurant_timezone": "UTC",
+      "delivery_zone_name": null,
+      "outside_delivery_area": null,
+      "card_type": null,
+      "used_payment_methods": [
+        "CASH"
+      ],
+      "company_account_id": 1765042,
+      "pos_system_id": 71032,
+      "restaurant_key": "aJRO5uZmwHG7wZxa16",
+      "restaurant_country": "Mexico",
+      "restaurant_city": "Merida",
+      "restaurant_zipcode": "97204",
+      "restaurant_street": "5b",
+      "restaurant_latitude": "21.03295766278363",
+      "restaurant_longitude": "-89.63417234074603",
+      "client_marketing_consent": true,
+      "restaurant_token": "gvs2XeXA1gkbbbq2e6MMXmzt5hFk30PZM",
+      "gateway_transaction_id": null,
+      "gateway_type": null,
+      "client_order_count": 1,
+      "api_version": 2,
+      "payment": "CASH",
+      "for_later": false,
+      "client_address": null,
+      "client_address_parts": null,
+      "items": [
+        {
+          "kitchen_internal_name": null,
+          "id": 1440558074,
+          "name": "Spaghetti Carbonara",
+          "total_item_price": 156,
+          "price": 12,
+          "quantity": 13,
+          "instructions": "",
+          "type": "item",
+          "type_id": 21223818,
+          "tax_rate": 0,
+          "tax_value": 0,
+          "parent_id": null,
+          "item_discount": 0,
+          "cart_discount_rate": 0,
+          "cart_discount": 0,
+          "tax_type": "GROSS",
+          "options": []
+        }
+      ]
+    }
+  ]
+}
+
+2. DATOS EXTRAÍDOS DEL PEDIDO:
+  - Pedido ID: 1090454004, Estado: 'accepted'
+  - Cliente: pcarrillo@gmail.com
+
+--- 🔎 Iniciando búsqueda de cliente en Smart Passes ---
+  - Obteniendo lista de todos los clientes de: https://pass.center/api/v1/loyalty/programs/4886905521176576/customers
+  - Encontrados 131 clientes en total. Buscando coincidencia por email...
+✅ Cliente encontrado en Smart Passes. ID: 4813056943325184
+
+4. LÓGICA DE ESTADO (ROUTING):
+  - El estado detectado es 'accepted'. Ejecutando acciones...
+
+--- 📨 Iniciando envío de mensaje vía Smart Passes ---
+✅ Petición a Smart Passes enviada exitosamente.
+
+  - Esperando 4 segundos antes de añadir puntos...
+
+--- ✨ Iniciando modificación de puntos (1) vía Smart Passes ---
+✅ Petición a Smart Passes enviada exitosamente.
+
+==================================================
+--- ✅ FIN DEL PROCESO DE WEBHOOK ---
+==================================================
+
+
+172.31.105.226 - - [23/Sep/2025 00:42:37] "POST /webhook/pedidos HTTP/1.1" 200 -
