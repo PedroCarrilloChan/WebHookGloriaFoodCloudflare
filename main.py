@@ -116,7 +116,7 @@ def webhook_gloriafood():
             return jsonify({"error": "El pedido no contiene un email de cliente"}), 400
 
         cliente_smartpass, error = buscar_cliente_smartpass(info_cliente['email'])
-        if error:
+        if error or not cliente_smartpass:
             print(f"🔴 Proceso detenido. Razón: {error}")
             return jsonify({"status": "ignored", "reason": error}), 200
 
@@ -139,10 +139,6 @@ def webhook_gloriafood():
             elif estado_actual == 'accepted' and pedido_ready == False:
                 mensaje = f"🍽️ ¡Tu pedido ha sido confirmado! Estamos preparando tu comida y pronto estará lista para llevártela a tu mesa. Folio: {info_pedido['id']}"
                 if enviar_notificacion_smartpass(customer_id, mensaje, "message"):
-                    print("\n  - Esperando 4 segundos antes de añadir puntos...")
-                    time.sleep(4)
-                    enviar_notificacion_smartpass(customer_id, None, "points/add", points=1)
-                    
                     # Agregar estampilla digital si supera $100
                     if total_precio >= 100:
                         print(f"\n  - Total ${total_precio} >= $100. Agregando estampilla digital...")
@@ -170,10 +166,6 @@ def webhook_gloriafood():
             elif estado_actual == 'accepted' and pedido_ready == False:
                 mensaje = f"✅ ¡Genial! Tu pedido ha sido confirmado y está en preparación. Folio del Pedido: {info_pedido['id']}"
                 if enviar_notificacion_smartpass(customer_id, mensaje, "message"):
-                    print("\n  - Esperando 4 segundos antes de añadir puntos...")
-                    time.sleep(4)
-                    enviar_notificacion_smartpass(customer_id, None, "points/add", points=1)
-                    
                     # Agregar estampilla digital si supera $100
                     if total_precio >= 100:
                         print(f"\n  - Total ${total_precio} >= $100. Agregando estampilla digital...")
@@ -211,4 +203,4 @@ def webhook_gloriafood():
 
 # --- Punto de Ejecución ---
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8000)
