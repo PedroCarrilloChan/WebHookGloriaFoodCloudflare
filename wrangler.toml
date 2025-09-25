@@ -1,6 +1,8 @@
 name = "gloriafood-webhook"
 main = "main.py"
 compatibility_date = "2024-09-23"
+compatibility_flags = ["python_workers"]
 
-[env.production.vars]
-SMARTPASSES_TOKEN = "anUdPurYdfzRyJruhKOCLliqoLKLNQPcydVziMDagAjIBzkVRyMAIaicdQLhFmiq"
+[vars]
+# Configura tu token aquí o via dashboard de Cloudflare
+# SMARTPASSES_TOKEN = "tu_token_aqui"
