@@ -73,7 +73,7 @@ class App:
             estado = pedido.get('status')
 
             # --- Aquí va tu lógica completa de manejo de estados 
-            # (Asegúrate de pasar `smartpass_token` a las llamadas de `enviar_notificacion_smartpass`)
+            # (Asegúrate de pasar `smartpass_token` a las llamadas de `enviar_notificacion_smartpas
             # Ejemplo:
             if estado == 'accepted':
                  mensaje = f"✅ ¡Genial! Tu pedido {pedido.get('id')} ha sido confirmado."
