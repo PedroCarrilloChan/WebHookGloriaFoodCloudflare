@@ -15,7 +15,7 @@ class App:
 
             # Leer datos
             data = await request.json()
-            print(f"Datos recibidos: {json.dumps(data)}")
+            print("Datos recibidos correctamente")
 
             # Validaciones básicas
             if not data or 'orders' not in data:
@@ -27,8 +27,10 @@ class App:
             pedido = data['orders'][0]
             email = pedido.get('client_email')
             estado = pedido.get('status')
+            order_id = pedido.get('id')
+            total_price = pedido.get('total_price', 0)
 
-            print(f"Email: {email}, Estado: {estado}")
+            print(f"Email: {email}, Estado: {estado}, ID: {order_id}")
 
             # Verificar token de forma más simple
             try:
@@ -45,15 +47,15 @@ class App:
                 "status": "success",
                 "message": "Webhook recibido correctamente",
                 "received_data": {
-                    "order_id": pedido.get('id'),
+                    "order_id": order_id,
                     "email": email,
                     "status": estado,
                     "token_configured": token_disponible,
-                    "total_price": pedido.get('total_price', 0)
+                    "total_price": total_price
                 }
             }
 
-            print(f"Enviando respuesta exitosa")
+            print("Enviando respuesta exitosa")
             return Response.json(result, status=200)
 
         except Exception as e:
