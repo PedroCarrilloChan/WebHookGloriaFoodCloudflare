@@ -1,9 +1,10 @@
-# main.py — Versión para Cloudflare Workers (Python) sin requests
+# main.py — Versión Cloudflare Worker (Python Experimental)
 import json
 from js import fetch, Response  # APIs nativas del runtime (Web Fetch)
 
 PROGRAM_ID = "4886905521176576"
 
+# --- Buscar cliente en SmartPasses ---
 async def buscar_cliente_smartpass(email_pedido: str, token: str):
     print(f"\n--- 🔎 Buscando cliente {email_pedido} en Smart Passes ---")
     headers = {
@@ -21,7 +22,7 @@ async def buscar_cliente_smartpass(email_pedido: str, token: str):
             return None, msg
 
         clientes = await r.json()
-        # En Pyodide, JSON puede ser JsProxy -> convertir a dict/list de Python si aplica
+        # Puede ser JsProxy → convertir a dict/list de Python
         clientes = clientes.to_py() if hasattr(clientes, "to_py") else clientes
 
         for c in clientes:
@@ -37,6 +38,7 @@ async def buscar_cliente_smartpass(email_pedido: str, token: str):
         return None, msg
 
 
+# --- Enviar notificación o puntos ---
 async def enviar_notificacion_smartpass(customer_id: str, message: str, endpoint: str, token: str, points: int = 1):
     print(f"\n--- 📨 Enviando notificación/puntos a {customer_id} ---")
     base_url = f"https://pass.center/api/v1/loyalty/programs/{PROGRAM_ID}/customers/{customer_id}"
@@ -76,8 +78,9 @@ async def enviar_notificacion_smartpass(customer_id: str, message: str, endpoint
         return False
 
 
+# --- Handler principal del Worker ---
 class Worker:
-    async def fetch(self, request, env, ctx):  # incluye ctx
+    async def fetch(self, request, env, ctx):  # 👈 handler oficial detectado por Cloudflare
         print("\n" + "=" * 50)
         print("--- 📥 INICIO DE NUEVO PROCESO DE WEBHOOK (CLOUDFLARE) ---")
 
@@ -85,11 +88,11 @@ class Worker:
             return Response.json({"error": "Método debe ser POST"}, status=405)
 
         try:
-            # request.json() puede devolver JsProxy -> convertir
+            # Leer JSON del request (puede ser JsProxy)
             raw = await request.json()
             data = raw.to_py() if hasattr(raw, "to_py") else raw
 
-            token = env.SMARTPASSES_TOKEN  # asegúrate de tener este Secret en Cloudflare
+            token = env.SMARTPASSES_TOKEN  # Debe existir como Secret en Cloudflare
 
             if not data or not isinstance(data.get("orders"), list) or not data["orders"]:
                 return Response.json({"error": "Formato de datos inválido"}, status=400)
@@ -105,7 +108,7 @@ class Worker:
 
             customer_id = cliente_smartpass["id"]
 
-            # --- Lógica de estados (extiéndela como necesites) ---
+            # --- Lógica de estados ---
             estado = pedido.get("status")
             mensaje = f"Tu pedido '{pedido.get('id')}' ha sido actualizado al estado: {estado}"
             await enviar_notificacion_smartpass(customer_id, mensaje, "message", token)
