@@ -1,8 +1,12 @@
-name = "gloriafood-webhook"
+# Nombre que coincide con tu proyecto en Cloudflare
+name = "gloriafood-webhook" 
+
 main = "main.py"
-compatibility_date = "2024-09-23"
+compatibility_date = "2024-09-23" # Puedes usar la fecha actual si quieres
 compatibility_flags = ["python_workers"]
 
-[vars]
-# Configura tu token aquí o via dashboard de Cloudflare
-# SMARTPASSES_TOKEN = "tu_token_aqui"
+# Habilita los logs para poder ver los errores
+[observability]
+logs = { enabled = true }
+
+# NO AÑADIR NINGÚN TOKEN O VARIABLE AQUÍ
