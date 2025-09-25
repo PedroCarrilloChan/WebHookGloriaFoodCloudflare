@@ -1,7 +1,9 @@
-name = "gloriafood-webhook-handler" # Puedes cambiar este nombre
+name = "gloriafood-webhook-handler"
 main = "main.py"
 compatibility_date = "2024-05-10"
 
-# Define que SMARTPASSES_TOKEN será un "secret" (variable de entorno segura)
+# 👇 AÑADE ESTA LÍNEA 👇
+compatibility_flags = ["python_workers"]
+
 [[secrets]]
 binding = "SMARTPASSES_TOKEN"
