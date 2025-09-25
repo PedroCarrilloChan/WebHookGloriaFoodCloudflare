@@ -1,4 +1,4 @@
-# main.py — Versión Cloudflare Worker (Python Experimental)
+# main.py — Cloudflare Worker (Python Experimental)
 import json
 from js import fetch, Response  # APIs nativas del runtime (Web Fetch)
 
@@ -80,7 +80,7 @@ async def enviar_notificacion_smartpass(customer_id: str, message: str, endpoint
 
 # --- Handler principal del Worker ---
 class Worker:
-    async def fetch(self, request, env, ctx):  # 👈 handler oficial detectado por Cloudflare
+    async def fetch(self, request, env, ctx):
         print("\n" + "=" * 50)
         print("--- 📥 INICIO DE NUEVO PROCESO DE WEBHOOK (CLOUDFLARE) ---")
 
@@ -123,3 +123,10 @@ class Worker:
             return Response.json(
                 {"error": "Error interno del servidor", "details": str(e)}, status=500
             )
+
+
+# 👇 Exponer también un handler toplevel (por seguridad)
+_worker_instance = Worker()
+
+async def fetch(request, env, ctx):
+    return await _worker_instance.fetch(request, env, ctx)
