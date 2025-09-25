@@ -1,4 +1,6 @@
-name = "gloriafood-webhook" 
+name = "gloriafood-webhook"
 main = "main.py"
-compatibility_date = "2024-05-10"
-compatibility_flags = ["python_workers"]
+compatibility_date = "2024-09-23"
+
+[env.production.vars]
+SMARTPASSES_TOKEN = "anUdPurYdfzRyJruhKOCLliqoLKLNQPcydVziMDagAjIBzkVRyMAIaicdQLhFmiq"
