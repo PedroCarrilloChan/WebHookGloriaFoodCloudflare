@@ -17,14 +17,18 @@ class App:
             data = await request.json()
             print("Datos recibidos correctamente")
 
-            # Validaciones básicas
-            if not data or 'orders' not in data:
-                return Response.json({"error": "Falta campo 'orders'"}, status=400)
+            # Validaciones básicas usando acceso directo
+            if not data:
+                return Response.json({"error": "No se enviaron datos"}, status=400)
 
-            if not data['orders']:
-                return Response.json({"error": "orders está vacío"}, status=400)
+            try:
+                orders = data.get('orders')
+                if not orders:
+                    return Response.json({"error": "Falta campo 'orders' o está vacío"}, status=400)
+            except:
+                return Response.json({"error": "Formato de datos inválido"}, status=400)
 
-            pedido = data['orders'][0]
+            pedido = orders[0]
             email = pedido.get('client_email')
             estado = pedido.get('status')
             order_id = pedido.get('id')
