@@ -1,6 +1,6 @@
 # main.py — Cloudflare Worker (Python Experimental)
 import json
-from js import fetch, Response
+from js import fetch, Response, Headers
 
 PROGRAM_ID = "4886905521176576"
 
