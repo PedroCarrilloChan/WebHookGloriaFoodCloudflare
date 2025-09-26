@@ -1,6 +1,6 @@
 # main.py — Cloudflare Worker (Python Experimental)
 import json
-from js import fetch, Response  # APIs nativas del runtime (Web Fetch)
+from js import fetch, Response
 
 PROGRAM_ID = "4886905521176576"
 
@@ -78,55 +78,60 @@ async def enviar_notificacion_smartpass(customer_id: str, message: str, endpoint
         return False
 
 
-# --- Handler principal del Worker ---
-class Worker:
-    async def fetch(self, request, env, ctx):
-        print("\n" + "=" * 50)
-        print("--- 📥 INICIO DE NUEVO PROCESO DE WEBHOOK (CLOUDFLARE) ---")
-
-        if request.method != "POST":
-            return Response.json({"error": "Método debe ser POST"}, status=405)
-
-        try:
-            # Leer JSON del request (puede ser JsProxy)
-            raw = await request.json()
-            data = raw.to_py() if hasattr(raw, "to_py") else raw
-
-            token = env.SMARTPASSES_TOKEN  # Debe existir como Secret en Cloudflare
-
-            if not data or not isinstance(data.get("orders"), list) or not data["orders"]:
-                return Response.json({"error": "Formato de datos inválido"}, status=400)
-
-            pedido = data["orders"][0]
-            email_cliente = pedido.get("client_email")
-            if not email_cliente:
-                return Response.json({"error": "El pedido no contiene email"}, status=400)
-
-            cliente_smartpass, error = await buscar_cliente_smartpass(email_cliente, token)
-            if error or not cliente_smartpass:
-                return Response.json({"status": "ignored", "reason": error}, status=200)
-
-            customer_id = cliente_smartpass["id"]
-
-            # --- Lógica de estados ---
-            estado = pedido.get("status")
-            mensaje = f"Tu pedido '{pedido.get('id')}' ha sido actualizado al estado: {estado}"
-            await enviar_notificacion_smartpass(customer_id, mensaje, "message", token)
-
-            print("--- ✅ FIN DEL PROCESO DE WEBHOOK ---")
-            return Response.json(
-                {"status": "success", "message": f"Acción para estado '{estado}' ejecutada."}
-            )
-
-        except Exception as e:
-            print(f"🚨 ERROR CAPTURADO EN FETCH: {e}")
-            return Response.json(
-                {"error": "Error interno del servidor", "details": str(e)}, status=500
-            )
-
-
-# 👇 Exponer también un handler toplevel (por seguridad)
-_worker_instance = Worker()
-
+# --- Handler principal del Worker (FORMATO CORRECTO PARA CLOUDFLARE) ---
 async def fetch(request, env, ctx):
-    return await _worker_instance.fetch(request, env, ctx)
+    """
+    Event handler principal que Cloudflare reconocerá automáticamente.
+    Esta función debe estar en el nivel superior del módulo.
+    """
+    print("\n" + "=" * 50)
+    print("--- 📥 INICIO DE NUEVO PROCESO DE WEBHOOK (CLOUDFLARE) ---")
+
+    if request.method != "POST":
+        return Response.json({"error": "Método debe ser POST"}, status=405)
+
+    try:
+        # Leer JSON del request (puede ser JsProxy)
+        raw = await request.json()
+        data = raw.to_py() if hasattr(raw, "to_py") else raw
+
+        token = env.SMARTPASSES_TOKEN  # Debe existir como Secret en Cloudflare
+
+        if not data or not isinstance(data.get("orders"), list) or not data["orders"]:
+            return Response.json({"error": "Formato de datos inválido"}, status=400)
+
+        pedido = data["orders"][0]
+        email_cliente = pedido.get("client_email")
+        if not email_cliente:
+            return Response.json({"error": "El pedido no contiene email"}, status=400)
+
+        cliente_smartpass, error = await buscar_cliente_smartpass(email_cliente, token)
+        if error or not cliente_smartpass:
+            return Response.json({"status": "ignored", "reason": error}, status=200)
+
+        customer_id = cliente_smartpass["id"]
+
+        # --- Lógica de estados ---
+        estado = pedido.get("status")
+        mensaje = f"Tu pedido '{pedido.get('id')}' ha sido actualizado al estado: {estado}"
+        await enviar_notificacion_smartpass(customer_id, mensaje, "message", token)
+
+        print("--- ✅ FIN DEL PROCESO DE WEBHOOK ---")
+        return Response.json(
+            {"status": "success", "message": f"Acción para estado '{estado}' ejecutada."}
+        )
+
+    except Exception as e:
+        print(f"🚨 ERROR CAPTURADO EN FETCH: {e}")
+        return Response.json(
+            {"error": "Error interno del servidor", "details": str(e)}, status=500
+        )
+
+
+# --- Handler alternativo para scheduled events (opcional) ---
+async def scheduled(event, env, ctx):
+    """
+    Handler para eventos programados (cron jobs)
+    """
+    print("🕐 Evento programado ejecutado")
+    return Response.json({"status": "scheduled_task_completed"})

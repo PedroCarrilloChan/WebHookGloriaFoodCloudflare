@@ -1,12 +1,18 @@
-# Nombre que coincide con tu proyecto en Cloudflare
-name = "gloriafood-webhook" 
-
-main = "main.py"
-compatibility_date = "2024-09-23" # Puedes usar la fecha actual si quieres
+name = "gloriafood-webhook"
+compatibility_date = "2024-09-23"
 compatibility_flags = ["python_workers"]
 
-# Habilita los logs para poder ver los errores
-[observability]
-logs = { enabled = true }
+# Punto de entrada principal
+main = "main.py"
 
-# NO AÑADIR NINGÚN TOKEN O VARIABLE AQUÍ
+# Variables de entorno
+[env.production]
+name = "gloriafood-webhook"
+
+# Variables de entorno para desarrollo local
+[env.development]
+name = "gloriafood-webhook-dev"
+
+# Configuración para Python workers (experimental)
+[python]
+# No necesitas especificar nada extra aquí por ahora
